@@ -4,9 +4,8 @@ Storing data with Redis
 """
 
 import uuid
-from typing import Union
 import redis
-from typing import Callable
+from typing import Callable, Union, Optional
 from functools import wraps
 
 
@@ -24,7 +23,7 @@ def count_calls(method: Callable) -> Callable:
         """
         key = method.__qualname__
         self._redis.incr(key)
-        return fn(self, *args, **kwargs)
+        return method(self, *args, **kwargs)
     return wrapper
 
 
