@@ -23,7 +23,7 @@ def count_calls(method: Callable) -> Callable:
         called.
         """
         key = method.__qualname__
-        self._redis.incr(key, amount=1)
+        self._redis.incr(key)
         return fn(self, *args, **kwargs)
     return wrapper
 
