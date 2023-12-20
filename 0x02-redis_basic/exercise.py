@@ -10,6 +10,24 @@ from typing import Callable
 from functools import wraps
 
 
+def count_calls(fn):
+    """
+    A decorator that takes a function fn as an argument. It defines a new
+    function wrapper that increments a counter in Redis every time the
+    method is called.
+    """
+    @wraps(fn)
+    def wrapper(self, *args, **kwargs):
+        """
+        A function that increments the counter every time a method is
+        called.
+        """
+        key = fn.__qualname__
+        self._redis.incr(key, amount=1)
+        return fn(self, *args, **kwargs)
+    return wrapper
+
+
 class Cache:
     """
     A class that stores an instance of the redis client
@@ -60,20 +78,3 @@ class Cache:
         Retrieves data and converts it to an integer
         """
         return self.get(key, fn=int)
-
-    def count_calls(fn):
-        """
-        A decorator that takes a function fn as an argument. It defines a new
-        function wrapper that increments a counter in Redis every time the
-        method is called.
-        """
-        @wraps(fn)
-        def wrapper(self, *args, **kwargs):
-            """
-            A function that increments the counter every time a method is
-            called.
-            """
-            key = fn.__qualname__
-            self._redis.incr(key, amount=1)
-            return fn(self, *args, **kwargs)
-        return wrapper
