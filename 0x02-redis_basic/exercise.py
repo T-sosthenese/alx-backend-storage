@@ -10,19 +10,19 @@ from typing import Callable
 from functools import wraps
 
 
-def count_calls(fn):
+def count_calls(method: Callable) -> Callable:
     """
     A decorator that takes a function fn as an argument. It defines a new
     function wrapper that increments a counter in Redis every time the
     method is called.
     """
-    @wraps(fn)
+    @wraps(method)
     def wrapper(self, *args, **kwargs):
         """
         A function that increments the counter every time a method is
         called.
         """
-        key = fn.__qualname__
+        key = method.__qualname__
         self._redis.incr(key, amount=1)
         return fn(self, *args, **kwargs)
     return wrapper
