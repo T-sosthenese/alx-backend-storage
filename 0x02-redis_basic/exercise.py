@@ -7,6 +7,7 @@ import uuid
 from typing import Union
 import redis
 from typing import Callable
+from functools import wraps
 
 
 class Cache:
@@ -20,6 +21,7 @@ class Cache:
         self._redis = redis.Redis()
         self._redis.flushdb()
 
+    @count_calls
     def store(self, data: Union[str, bytes, int, float]) -> str:
         """
         A class method that stores an instance of the redis client
@@ -58,3 +60,20 @@ class Cache:
         Retrieves data and converts it to an integer
         """
         return self.get(key, fn=int)
+
+    def count_calls(fn):
+        """
+        A decorator that takes a function fn as an argument. It defines a new
+        function wrapper that increments a counter in Redis every time the
+        method is called.
+        """
+        @wraps(fn)
+        def wrapper(self, *args, **kwargs):
+            """
+            A function that increments the counter every time a method is
+            called.
+            """
+            key = fn.__qualname__
+            self._redis.incr(key, amount=1)
+            return fn(self, *args, **kwargs)
+        return wrapper
